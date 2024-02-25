@@ -2,8 +2,11 @@ pre-reqs:
 
 - for non-nixOs systems that have the nix package manager installed:
     - enable nix flakes
-    - install `qemu-user-static` package then in `/etc/nix/nix.conf` add:
-        `extra-platforms = aarch64-linux arm-linux` and restart `nix-daemon.service`
+    - install `qemu-user-static qemu-user-binfmt qemu-user curl git` package then in `/etc/nix/nix.conf` add: 
+        `extra-platforms = aarch64-linux arm-linux` 
+        `trusted-users = root <your-user-here>`
+    and restart
+        `nix-daemon.service`
 
 
 - to build the flake defined image: `nix build .#images.rpi4 --system aarch64-linux`

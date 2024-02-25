@@ -8,28 +8,32 @@
   };
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/8bf65f17d8070a0a490daf5f1c784b87ee73982c";
-    hytech_data_acq.url = "github:RCMast3r/data_acq";
+    data_acq.url = "github:KSU-MS/fg_daq";
     raspberry-pi-nix.url = "github:tstat/raspberry-pi-nix";
 
   };
-  outputs = { self, nixpkgs, hytech_data_acq, raspberry-pi-nix }: rec {
+  outputs = { self, nixpkgs, data_acq, raspberry-pi-nix }: rec {
     
     shared_config = {
-      nixpkgs.overlays = [ (hytech_data_acq.overlays.default) ];
+      nixpkgs.overlays = [ (data_acq.overlays.default) ];
 
       # nixpkgs.config.allowUnsupportedSystem = true;
       nixpkgs.hostPlatform.system = "aarch64-linux";
 
-      systemd.services.sshd.wantedBy =
-        nixpkgs.lib.mkOverride 40 [ "multi-user.target" ];
-      services.openssh = { enable = true; };
-
+      # Docker setup
       virtualisation.docker.enable = true;
       users.users.nixos.extraGroups = [ "docker" ];
       virtualisation.docker.rootless = {
         enable = true;
         setSocketVariable = true;
       };
+
+      # networking/SSH
+
+      systemd.services.sshd.wantedBy =
+        nixpkgs.lib.mkOverride 40 [ "multi-user.target" ];
+
+      services.openssh = { enable = true; };
       services.openssh.listenAddresses = [
         {
           addr = "0.0.0.0";
@@ -40,10 +44,8 @@
           port = 22;
         }
       ];
-      users.extraUsers.nixos.openssh.authorizedKeys.keys = [
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJSt9Z8Qdq068xj/ILVAMqmkVyUvKCSTsdaoehEZWRut rcmast3r1@gmail.com"
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPhMu3LzyGPjh0WkqV7kZYwA+Hyd2Bfc+1XQJ88HeU4A rcmast3r1@gmail.com"
-      ];
+
+      users.extraUsers.nixos.openssh.authorizedKeys.keys = [];
       networking.useDHCP = false;
       # users.extraUsers.nixos.openssh.extraConfig = "AddressFamily = any";
       # networking.hostname = "hytech-pi";
@@ -51,7 +53,7 @@
       networking.wireless = {
         enable = true;
         interfaces = [ "wlan0" ];
-        networks = { "yo" = { psk = "11111111"; }; };
+        networks = { "ye" = { psk = "fsaenerd"; }; };
       };
 
       # networking.defaultGateway.address = "192.168.84.243";
@@ -84,10 +86,26 @@
       programs.git = {
         enable = true;
         config = {
-          user.name = "Ben Hall";
-          user.email = "rcmast3r1@gmail.com";
+          user.name = "";
+          user.email = "";
         };
       };
+
+      # Serial udev rule
+      services.udev.extraRules = ''
+        # Identify
+        KERNEL=="ttyUSB*",
+        SUBSYSTEM=="tty",
+        ATTRS{idVendor}=="0403", # Find these 2 with this command 
+        ATTRS{idProduct}=="0002", # udevadm info --attribute-walk --name=/dev/*
+        
+        # Set perms
+        GROUPS="wheel",
+        MODE = "0660",
+        
+        # Symlink it for a consistant name
+        SYMLINK+="xboi"
+      '';
     };
 
     can_config = {
@@ -136,7 +154,7 @@
                     enable = true;
                     params = { };
                   };
-                  # TODO change this as needed
+                  # TODO: change this as needed
                   mcp2515-can0 = {
                     enable = true;
                     params = {
@@ -174,9 +192,6 @@
             options = {
               services.data_writer.options.enable = true;
             };
-            
-
-
           }
         )
         (can_config)
