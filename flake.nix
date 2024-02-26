@@ -48,7 +48,7 @@
       users.extraUsers.nixos.openssh.authorizedKeys.keys = [];
       networking.useDHCP = false;
       # users.extraUsers.nixos.openssh.extraConfig = "AddressFamily = any";
-      # networking.hostname = "hytech-pi";
+      # networking.hostname = "ksu-pi";
       networking.firewall.enable = false;
       networking.wireless = {
         enable = true;
@@ -93,18 +93,12 @@
 
       # Serial udev rule
       services.udev.extraRules = ''
+        KERNEL=="ttyUSB*", SUBSYSTEM=="tty", ATTRS{idVendor}=="1d6b", ATTRS{idProduct}=="0002", SYMLINK+="xboi"
         # Identify
-        KERNEL=="ttyUSB*",
-        SUBSYSTEM=="tty",
-        ATTRS{idVendor}=="0403", # Find these 2 with this command 
-        ATTRS{idProduct}=="0002", # udevadm info --attribute-walk --name=/dev/*
-        
+        # Find the ATTRS with this command
+        # udevadm info --attribute-walk --name=/dev/*
         # Set perms
-        GROUPS="wheel",
-        MODE = "0660",
-        
         # Symlink it for a consistant name
-        SYMLINK+="xboi"
       '';
     };
 
