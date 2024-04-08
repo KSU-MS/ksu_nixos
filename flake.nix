@@ -47,36 +47,33 @@
 
       users.extraUsers.nixos.openssh.authorizedKeys.keys = [];
       networking.useDHCP = false;
-      # users.extraUsers.nixos.openssh.extraConfig = "AddressFamily = any";
-      # networking.hostname = "ksu-pi";
       networking.firewall.enable = false;
       networking.wireless = {
         enable = true;
         interfaces = [ "wlan0" ];
-        networks = { "ye" = { psk = "fsaenerd"; }; };
+        networks = { "KSUDQ" = { psk = "k18E206!"; }; };
       };
 
-      # networking.defaultGateway.address = "192.168.84.243";
       networking.interfaces.wlan0.ipv4.addresses = [{
-        address = "192.168.143.69";
+        address = "192.168.1.120";
         prefixLength = 24;
       }];
 
-      networking.interfaces.end0.ipv4 = {
-        addresses = [
-          {
-            address = "192.168.1.100"; # Your static IP address
-            prefixLength = 24; # Netmask, 24 for 255.255.255.0
-          }
-        ];
-        routes = [
-          {
-            address = "0.0.0.0";
-            prefixLength = 0;
-            via = "192.168.1.1"; # Your gateway IP address
-          }
-        ];
-      };
+      # networking.interfaces.end0.ipv4 = {
+      #   addresses = [
+      #     {
+      #       address = "192.168.1.100"; # Your static IP address
+      #       prefixLength = 24; # Netmask, 24 for 255.255.255.0
+      #     }
+      #   ];
+      #   routes = [
+      #     {
+      #       address = "0.0.0.0";
+      #       prefixLength = 0;
+      #       via = "192.168.1.1"; # Your gateway IP address
+      #     }
+      #   ];
+      # };
       networking.nameservers = [ "192.168.1.1" ]; # Your DNS server, often the gateway
 
       systemd.services.wpa_supplicant.wantedBy =
@@ -93,7 +90,7 @@
 
       # Serial udev rule
       services.udev.extraRules = ''
-        KERNEL=="ttyUSB*", SUBSYSTEM=="tty", ATTRS{idVendor}=="1d6b", ATTRS{idProduct}=="0002", SYMLINK+="xboi"
+        KERNEL=="ttyUSB*", SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6015", SYMLINK+="xboi"
         # Identify
         # Find the ATTRS with this command
         # udevadm info --attribute-walk --name=/dev/*
