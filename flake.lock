@@ -50,16 +50,17 @@
         "utils": "utils_6"
       },
       "locked": {
-        "lastModified": 1708830398,
-        "narHash": "sha256-o9jeajtPKFOaxmXetarI4axrpUYoxjNcMU+HxcwtMyM=",
+        "lastModified": 1712629648,
+        "narHash": "sha256-oFkaHGmUjMHnPi8JIXAoH2VoU2o9+iNqA6036w02Hsc=",
         "owner": "KSU-MS",
         "repo": "fg_daq",
-        "rev": "ff2c8324debaa3be87017e4c4ce438279c39af76",
+        "rev": "4ad1658a9f1c21658fe1f7101ea5f1cced8062d5",
         "type": "github"
       },
       "original": {
         "owner": "KSU-MS",
         "repo": "fg_daq",
+        "rev": "4ad1658a9f1c21658fe1f7101ea5f1cced8062d5",
         "type": "github"
       }
     },
@@ -361,11 +362,11 @@
         "u-boot-src": "u-boot-src"
       },
       "locked": {
-        "lastModified": 1706065331,
-        "narHash": "sha256-x7PvLJlEK38n6e5BYjlBzbFne0TCXgV40lvnFsiyFSU=",
+        "lastModified": 1710855529,
+        "narHash": "sha256-yva2QIb9m2RnsPWFQean98seysV8CY9oTxyrOu2NX2k=",
         "owner": "tstat",
         "repo": "raspberry-pi-nix",
-        "rev": "9c35dd99cfd2e45898e3c4417b7269e7efe8262d",
+        "rev": "b39b556e8a1c4bd6f8a59e8719dc1f658f18f255",
         "type": "github"
       },
       "original": {

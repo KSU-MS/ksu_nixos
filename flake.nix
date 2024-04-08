@@ -8,12 +8,12 @@
   };
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/8bf65f17d8070a0a490daf5f1c784b87ee73982c";
-    data_acq.url = "github:KSU-MS/fg_daq";
+    data_acq.url = "github:KSU-MS/fg_daq/4ad1658a9f1c21658fe1f7101ea5f1cced8062d5";
     raspberry-pi-nix.url = "github:tstat/raspberry-pi-nix";
 
   };
   outputs = { self, nixpkgs, data_acq, raspberry-pi-nix }: rec {
-    
+
     shared_config = {
       nixpkgs.overlays = [ (data_acq.overlays.default) ];
 
@@ -45,7 +45,7 @@
         }
       ];
 
-      users.extraUsers.nixos.openssh.authorizedKeys.keys = [];
+      users.extraUsers.nixos.openssh.authorizedKeys.keys = [ ];
       networking.useDHCP = false;
       networking.firewall.enable = false;
       networking.wireless = {
@@ -99,16 +99,18 @@
       '';
     };
 
-    can_config = {
-      networking.can.enable = true;
+    # can_config = {
+    #   networking.can.enable = true;
+    #
+    #   networking.can.interfaces = {
+    #     can0 = {
+    #       bitrate = 500000;
+    #     };
+    #   };
+    # };
 
-      networking.can.interfaces = {
-        can0 = {
-          bitrate = 500000;
-        };
-      };
-    };
-    pi4_config = { pkgs, lib, ... }:
+
+    pi_config = { pkgs, lib, ... }:
       {
         nix.settings.require-sigs = false;
         users.users.nixos.group = "nixos";
@@ -145,33 +147,36 @@
                     enable = true;
                     params = { };
                   };
+
                   # TODO: change this as needed
-                  mcp2515-can0 = {
-                    enable = true;
-                    params = {
-                      oscillator =
-                        {
-                          enable = true;
-                          value = "16000000";
-                        };
-                      interrupt = {
-                        enable = true;
-                        value = "16"; # this is the individual gpio number for the interrupt of the spi boi
-                      };
-                    };
-                  };
+                  # mcp2515-can0 = {
+                  #   enable = true;
+                  #   params = {
+                  #     oscillator =
+                  #       {
+                  #         enable = true;
+                  #         value = "16000000";
+                  #       };
+                  #     interrupt = {
+                  #       enable = true;
+                  #       value = "16"; # this is the individual gpio number for the interrupt of the spi boi
+                  #     };
+                  #   };
+                  # };
                 };
               };
             };
           };
         };
       };
+
+
     # shoutout to https://github.com/tstat/raspberry-pi-nix absolute goat
     nixosConfigurations.rpi4 = nixpkgs.lib.nixosSystem {
       system = "aarch64-linux";
       modules = [
         ./modules/data_acq.nix
-        ./modules/can_network.nix
+        # ./modules/can_network.nix
         (
           { pkgs, ... }: {
             config = {
@@ -185,32 +190,38 @@
             };
           }
         )
-        (can_config)
+        # (can_config)
         (shared_config)
         raspberry-pi-nix.nixosModules.raspberry-pi
-        pi4_config
+        pi_config
       ];
     };
 
     nixosConfigurations.rpi3 = nixpkgs.lib.nixosSystem {
       system = "aarch64-linux";
       modules = [
-        "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64-installer.nix"
         ./modules/data_acq.nix
+        # ./modules/can_network.nix
         (
-          { ... }: {
+          { pkgs, ... }: {
             config = {
+              environment.systemPackages = [
+                pkgs.can-utils
+              ];
               sdImage.compressImage = false;
             };
             options = {
               services.data_writer.options.enable = true;
             };
-
           }
         )
+        # (can_config)
         (shared_config)
+        raspberry-pi-nix.nixosModules.raspberry-pi
+        pi_config
       ];
     };
+
     images.rpi4 = nixosConfigurations.rpi4.config.system.build.sdImage;
     images.rpi3 = nixosConfigurations.rpi3.config.system.build.sdImage;
     defaultPackage.aarch64-linux = nixosConfigurations.rpi4.config.system.build.toplevel;
