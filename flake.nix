@@ -86,29 +86,28 @@
           user.email = "";
         };
       };
+
+      # Serial udev rule for xbee
+      services.udev.extraRules = ''
+        KERNEL=="ttyUSB*", SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6015", SYMLINK+="xboi"
+        # Identify
+        # Find the ATTRS with this command
+        # udevadm info --attribute-walk --name=/dev/*
+        # Set perms
+        # Symlink it for a consistant name
+      '';
+
+      # Config for can device
+      # can_config = {
+      #   networking.can.enable = true;
+      #
+      #   networking.can.interfaces = {
+      #     can0 = {
+      #       bitrate = 500000;
+      #     };
+      #   };
+      # };
     };
-
-    # Serial udev rule for xbee
-    services.udev.extraRules = ''
-      KERNEL=="ttyUSB*", SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6015", SYMLINK+="xboi"
-      # Identify
-      # Find the ATTRS with this command
-      # udevadm info --attribute-walk --name=/dev/*
-      # Set perms
-      # Symlink it for a consistant name
-    '';
-
-    # Config for can device
-    # can_config = {
-    #   networking.can.enable = true;
-    #
-    #   networking.can.interfaces = {
-    #     can0 = {
-    #       bitrate = 500000;
-    #     };
-    #   };
-    # };
-
 
     pi_config = { pkgs, lib, ... }:
       {
