@@ -8,7 +8,7 @@
   };
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/8bf65f17d8070a0a490daf5f1c784b87ee73982c";
-    data_acq.url = "github:KSU-MS/fg_daq/1622a8403abde90e577fe390a503ba829fbcb4e0";
+    data_acq.url = "github:KSU-MS/fg_daq/fd7f65b49af9355a7e53cb0c21ad6367051dcdf2";
     raspberry-pi-nix.url = "github:tstat/raspberry-pi-nix";
 
   };
