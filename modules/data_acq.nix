@@ -5,7 +5,8 @@ let
   # user of hello.nix module HAS ACTUALLY SET.
   # cfg is a typical convention.
   cfg = config.services.data_writer;
-in {
+in
+{
 
   config = {
     # https://nixos.org/manual/nixos/stable/options.html search for systemd.services.<name>. to get list of all of the options for 
@@ -14,8 +15,9 @@ in {
       wantedBy = [ "multi-user.target" ];
       serviceConfig.After = [ "network.target" ];
       # https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html serviceconfig
+      serviceConfig.ExecStartPre = "export D_SOURCE=SERIAL";
       serviceConfig.ExecStart =
-        "export D_SOURCE=SERIAL && sudo ${pkgs.py_data_acq_pkg}/bin/runner.py ${pkgs.proto_gen_pkg}/bin/ ${pkgs.can_pkg}";
+        "${pkgs.py_data_acq_pkg}/bin/runner.py ${pkgs.proto_gen_pkg}/bin/ ${pkgs.can_pkg}";
       serviceConfig.ExecStop = "/bin/kill -SIGINT $MAINPID";
       serviceConfig.Restart = "on-failure";
     };
