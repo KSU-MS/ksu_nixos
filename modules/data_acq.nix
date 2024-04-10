@@ -15,7 +15,6 @@ in
       wantedBy = [ "multi-user.target" ];
       serviceConfig.After = [ "network.target" ];
       # https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html serviceconfig
-      serviceConfig.ExecStartPre = "export D_SOURCE=SERIAL";
       serviceConfig.ExecStart =
         "${pkgs.py_data_acq_pkg}/bin/runner.py ${pkgs.proto_gen_pkg}/bin/ ${pkgs.can_pkg}";
       serviceConfig.ExecStop = "/bin/kill -SIGINT $MAINPID";

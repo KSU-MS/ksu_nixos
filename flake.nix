@@ -29,7 +29,6 @@
       };
 
       # networking/SSH
-
       systemd.services.sshd.wantedBy =
         nixpkgs.lib.mkOverride 40 [ "multi-user.target" ];
 
@@ -87,18 +86,19 @@
           user.email = "";
         };
       };
-
-      # Serial udev rule
-      services.udev.extraRules = ''
-        KERNEL=="ttyUSB*", SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6015", SYMLINK+="xboi"
-        # Identify
-        # Find the ATTRS with this command
-        # udevadm info --attribute-walk --name=/dev/*
-        # Set perms
-        # Symlink it for a consistant name
-      '';
     };
 
+    # Serial udev rule for xbee
+    services.udev.extraRules = ''
+      KERNEL=="ttyUSB*", SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6015", SYMLINK+="xboi"
+      # Identify
+      # Find the ATTRS with this command
+      # udevadm info --attribute-walk --name=/dev/*
+      # Set perms
+      # Symlink it for a consistant name
+    '';
+
+    # Config for can device
     # can_config = {
     #   networking.can.enable = true;
     #
@@ -172,7 +172,7 @@
 
 
     # shoutout to https://github.com/tstat/raspberry-pi-nix absolute goat
-    nixosConfigurations.rpi4 = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.rpi = nixpkgs.lib.nixosSystem {
       system = "aarch64-linux";
       modules = [
         ./modules/data_acq.nix
@@ -183,6 +183,9 @@
               environment.systemPackages = [
                 pkgs.can-utils
               ];
+              environment.variables = {
+                D_SOURCE = "SERIAL";
+              };
               sdImage.compressImage = false;
             };
             options = {
@@ -197,33 +200,7 @@
       ];
     };
 
-    nixosConfigurations.rpi3 = nixpkgs.lib.nixosSystem {
-      system = "aarch64-linux";
-      modules = [
-        ./modules/data_acq.nix
-        # ./modules/can_network.nix
-        (
-          { pkgs, ... }: {
-            config = {
-              environment.systemPackages = [
-                pkgs.can-utils
-              ];
-              sdImage.compressImage = false;
-            };
-            options = {
-              services.data_writer.options.enable = true;
-            };
-          }
-        )
-        # (can_config)
-        (shared_config)
-        raspberry-pi-nix.nixosModules.raspberry-pi
-        pi_config
-      ];
-    };
-
-    images.rpi4 = nixosConfigurations.rpi4.config.system.build.sdImage;
-    images.rpi3 = nixosConfigurations.rpi3.config.system.build.sdImage;
+    images.rpi = nixosConfigurations.rpi.config.system.build.sdImage;
     defaultPackage.aarch64-linux = nixosConfigurations.rpi4.config.system.build.toplevel;
   };
 }
