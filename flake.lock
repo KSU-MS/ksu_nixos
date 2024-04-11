@@ -50,17 +50,16 @@
         "utils": "utils_6"
       },
       "locked": {
-        "lastModified": 1712719400,
-        "narHash": "sha256-tiKfMTFsuWixS0bqr2QweLm14YxxeQFfOdrJcOqU3O4=",
+        "lastModified": 1712818314,
+        "narHash": "sha256-3U+wRG3tn8vD+8BFKI3A+6kuSIARPxlxVHLTilq4ETM=",
         "owner": "KSU-MS",
         "repo": "fg_daq",
-        "rev": "fd7f65b49af9355a7e53cb0c21ad6367051dcdf2",
+        "rev": "17b6fa54ebce4ff89553ca5e4c2482e3a5a5c4e9",
         "type": "github"
       },
       "original": {
         "owner": "KSU-MS",
         "repo": "fg_daq",
-        "rev": "fd7f65b49af9355a7e53cb0c21ad6367051dcdf2",
         "type": "github"
       }
     },
