@@ -7,28 +7,33 @@
     ];
   };
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/8bf65f17d8070a0a490daf5f1c784b87ee73982c";
+    nixpkgs.url = "github:NixOS/nixpkgs/c871670c7dad94b3454b8fc9a8a35e1ab92d8b3e";
     data_acq.url = "github:KSU-MS/fg_daq/";
     raspberry-pi-nix.url = "github:tstat/raspberry-pi-nix";
-
   };
   outputs = { self, nixpkgs, data_acq, raspberry-pi-nix }: rec {
-
     shared_config = {
       nixpkgs.overlays = [ (data_acq.overlays.default) ];
-
-      # nixpkgs.config.allowUnsupportedSystem = true;
       nixpkgs.hostPlatform.system = "aarch64-linux";
 
-      # Docker setup
-      virtualisation.docker.enable = true;
-      users.users.nixos.extraGroups = [ "docker" ];
-      virtualisation.docker.rootless = {
-        enable = true;
-        setSocketVariable = true;
-      };
+      # NTP time sync.
+      services.timesyncd.enable = true;
 
-      # networking/SSH
+      # User setup
+      nix.settings.require-sigs = false;
+      users.users.nixos.group = "nixos";
+      users.users.root.initialPassword = "root";
+      users.users.nixos.password = "nixos";
+      users.users.nixos.extraGroups = [ "wheel" ];
+      users.groups.nixos = { };
+      users.users.nixos.isNormalUser = true;
+
+      system.activationScripts.createRecordingsDir = nixpkgs.lib.stringAfter [ "users" ] ''
+        mkdir -p /home/nixos/recordings
+        chown nixos:users /home/nixos/recordings
+      '';
+
+      # SSH settings
       systemd.services.sshd.wantedBy =
         nixpkgs.lib.mkOverride 40 [ "multi-user.target" ];
 
@@ -45,40 +50,15 @@
       ];
 
       users.extraUsers.nixos.openssh.authorizedKeys.keys = [ ];
+
+      # Network settings
       networking.useDHCP = false;
+      networking.hostName = "Philipp";
       networking.firewall.enable = false;
-      networking.wireless = {
-        enable = true;
-        interfaces = [ "wlan0" ];
-        networks = { "KSUDQ" = { psk = "k18E206!"; }; };
-      };
 
-      networking.interfaces.wlan0.ipv4.addresses = [{
-        address = "192.168.1.120";
-        prefixLength = 24;
-      }];
+      # systemd.services."network-setup.service".wantedBy = [ "multi-user.target" ];
 
-      # networking.interfaces.end0.ipv4 = {
-      #   addresses = [
-      #     {
-      #       address = "192.168.1.100"; # Your static IP address
-      #       prefixLength = 24; # Netmask, 24 for 255.255.255.0
-      #     }
-      #   ];
-      #   routes = [
-      #     {
-      #       address = "0.0.0.0";
-      #       prefixLength = 0;
-      #       via = "192.168.1.1"; # Your gateway IP address
-      #     }
-      #   ];
-      # };
-      networking.nameservers = [ "192.168.1.1" ]; # Your DNS server, often the gateway
-
-      systemd.services.wpa_supplicant.wantedBy =
-        nixpkgs.lib.mkOverride 10 [ "default.target" ];
-      # NTP time sync.
-      services.timesyncd.enable = true;
+      # Git setup
       programs.git = {
         enable = true;
         config = {
@@ -88,14 +68,14 @@
       };
 
       # Serial udev rule for xbee
-      services.udev.extraRules = ''
-        KERNEL=="ttyUSB*", SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6015", SYMLINK+="xboi"
-        # Identify
-        # Find the ATTRS with this command
-        # udevadm info --attribute-walk --name=/dev/*
-        # Set perms
-        # Symlink it for a consistant name
-      '';
+      # services.udev.extraRules = ''
+      #   KERNEL=="ttyUSB*", SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6015", SYMLINK+="xboi"
+      #   # Identify
+      #   # Find the ATTRS with this command
+      #   # udevadm info --attribute-walk --name=/dev/*
+      #   # Set perms
+      #   # Symlink it for a consistant name
+      # '';
 
       # Config for can device
       # can_config = {
@@ -111,31 +91,21 @@
 
     pi_config = { pkgs, lib, ... }:
       {
-        nix.settings.require-sigs = false;
-        users.users.nixos.group = "nixos";
-        users.users.root.initialPassword = "root";
-        users.users.nixos.password = "nixos";
-        users.users.nixos.extraGroups = [ "wheel" ];
-        users.groups.nixos = { };
-        users.users.nixos.isNormalUser = true;
-
-        system.activationScripts.createRecordingsDir = lib.stringAfter [ "users" ] ''
-          mkdir -p /home/nixos/recordings
-          chown nixos:users /home/nixos/recordings
-        '';
+        # More networking config
+        networking = {
+          interfaces.enu1u1u1.ipv4.addresses = [{
+            address = "192.168.1.7"; # Your static IP address
+            prefixLength = 24; # Netmask, 24 for 255.255.255.0
+          }];
+          defaultGateway = "192.168.1.1";
+        };
 
         hardware = {
-          bluetooth.enable = true;
+          bluetooth.enable = false;
           raspberry-pi = {
             config = {
               all = {
                 base-dt-params = {
-                  #           # enable autoprobing of bluetooth driver
-                  #           # https://github.com/raspberrypi/linux/blob/c8c99191e1419062ac8b668956d19e788865912a/arch/arm/boot/dts/overlays/README#L222-L224
-                  krnbt = {
-                    enable = true;
-                    value = "on";
-                  };
                   spi = {
                     enable = true;
                     value = "on";
@@ -146,22 +116,6 @@
                     enable = true;
                     params = { };
                   };
-
-                  # TODO: change this as needed
-                  # mcp2515-can0 = {
-                  #   enable = true;
-                  #   params = {
-                  #     oscillator =
-                  #       {
-                  #         enable = true;
-                  #         value = "16000000";
-                  #       };
-                  #     interrupt = {
-                  #       enable = true;
-                  #       value = "16"; # this is the individual gpio number for the interrupt of the spi boi
-                  #     };
-                  #   };
-                  # };
                 };
               };
             };
@@ -179,11 +133,30 @@
         (
           { pkgs, ... }: {
             config = {
-              environment.systemPackages = [
-                pkgs.can-utils
+              # Utils and other apps you want
+              environment.systemPackages = with pkgs; [
+                can-utils
+                iperf3
               ];
+
+              # Settings for the image that is generated
               sdImage.compressImage = false;
+              raspberry-pi-nix.uboot.enable = false;
+
+              # One shot systemd service to fix wacky fucking network bug
+              systemd.services.restart-network-setup = {
+                description = "Restart Network Setup Service";
+                wantedBy = [ "multi-user.target" ];
+                after = [ "network-setup.service" ];
+                serviceConfig = {
+                  Type = "oneshot";
+                  ExecStart = "${pkgs.systemd}/bin/systemctl restart network-setup.service";
+                  RemainAfterExit = true;
+                };
+              };
             };
+
+            # Start the logging service
             options = {
               services.data_writer.options.enable = true;
             };
@@ -196,7 +169,7 @@
       ];
     };
 
-    images.rpi = nixosConfigurations.rpi.config.system.build.sdImage;
-    defaultPackage.aarch64-linux = nixosConfigurations.rpi4.config.system.build.toplevel;
+    images.rpi_sd = nixosConfigurations.rpi.config.system.build.sdImage;
+    images.rpi_top = nixosConfigurations.rpi.config.system.build.toplevel;
   };
 }
