@@ -1,22 +1,31 @@
 {
-  description = "Build image";
+  description = "Build image for KSU-MS's Pi running the ksu_daq flake and some other gizmos later";
+
+  # Cache to reduce build times dont worry about it
   nixConfig = {
     extra-substituters = [ "https://raspberry-pi-nix.cachix.org" ];
     extra-trusted-public-keys = [
       "raspberry-pi-nix.cachix.org-1:WmV2rdSangxW0rZjY/tBvBDSaNFQ3DyEQsVw8EvHn9o="
     ];
   };
+
+  # All the outside things to fetch from the internet
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/c871670c7dad94b3454b8fc9a8a35e1ab92d8b3e";
     data_acq.url = "github:KSU-MS/fg_daq/";
     raspberry-pi-nix.url = "github:tstat/raspberry-pi-nix";
   };
+
+  # All the things going into the generated image
   outputs = { self, nixpkgs, data_acq, raspberry-pi-nix }: rec {
     shared_config = {
-      nixpkgs.overlays = [ (data_acq.overlays.default) ];
+      # Target architecture
       nixpkgs.hostPlatform.system = "aarch64-linux";
 
-      # NTP time sync.
+      # Overlays
+      nixpkgs.overlays = [ (data_acq.overlays.default) ];
+
+      # NTP time sync flag (network time protocol)
       services.timesyncd.enable = true;
 
       # User setup
@@ -33,30 +42,19 @@
         chown nixos:users /home/nixos/recordings
       '';
 
-      # SSH settings
-      systemd.services.sshd.wantedBy =
-        nixpkgs.lib.mkOverride 40 [ "multi-user.target" ];
+      # Network settings
+      networking.hostName = "Philipp";
 
+      networking.firewall.enable = false;
+      networking.useDHCP = false;
+
+      # SSH settings
       services.openssh = { enable = true; };
-      services.openssh.listenAddresses = [
-        {
-          addr = "0.0.0.0";
-          port = 22;
-        }
-        {
-          addr = ":";
-          port = 22;
-        }
-      ];
 
       users.extraUsers.nixos.openssh.authorizedKeys.keys = [ ];
 
-      # Network settings
-      networking.useDHCP = false;
-      networking.hostName = "Philipp";
-      networking.firewall.enable = false;
-
-      # systemd.services."network-setup.service".wantedBy = [ "multi-user.target" ];
+      systemd.services.sshd.wantedBy =
+        nixpkgs.lib.mkOverride 40 [ "multi-user.target" ];
 
       # Git setup
       programs.git = {
@@ -77,51 +75,32 @@
       #   # Symlink it for a consistant name
       # '';
 
-      # Config for can device
-      # can_config = {
-      #   networking.can.enable = true;
-      #
-      #   networking.can.interfaces = {
-      #     can0 = {
-      #       bitrate = 500000;
-      #     };
-      #   };
-      # };
     };
 
-    pi_config = { pkgs, lib, ... }:
-      {
-        # More networking config
-        networking = {
-          interfaces.enu1u1u1.ipv4.addresses = [{
-            address = "192.168.1.7"; # Your static IP address
-            prefixLength = 24; # Netmask, 24 for 255.255.255.0
-          }];
-          defaultGateway = "192.168.1.1";
-        };
+    # Config for can device
+    can_config = {
+      # Lol its just another network config
+      networking = {
+        can.enable = true;
 
-        hardware = {
-          bluetooth.enable = false;
-          raspberry-pi = {
-            config = {
-              all = {
-                base-dt-params = {
-                  spi = {
-                    enable = true;
-                    value = "on";
-                  };
-                };
-                dt-overlays = {
-                  spi-bcm2835 = {
-                    enable = true;
-                    params = { };
-                  };
-                };
-              };
-            };
+        can.interfaces = {
+          can0 = {
+            bitrate = 500000;
           };
         };
       };
+    };
+
+    pi_config = { pkgs, lib, ... }: {
+      # More networking config
+      networking = {
+        interfaces.enu1u1u1.ipv4.addresses = [{
+          address = "192.168.1.7"; # Your static IP address
+          prefixLength = 24; # Netmask, 24 for 255.255.255.0
+        }];
+        defaultGateway = "192.168.1.1";
+      };
+    };
 
 
     # shoutout to https://github.com/tstat/raspberry-pi-nix absolute goat
@@ -162,13 +141,18 @@
             };
           }
         )
-        # (can_config)
-        (shared_config)
+
+        # Getting the RPi firmware
         raspberry-pi-nix.nixosModules.raspberry-pi
+
+        # Running the configs made earlier
+        shared_config
+        can_config
         pi_config
       ];
     };
 
+    # Defineing the build commands for the terminal
     images.rpi_sd = nixosConfigurations.rpi.config.system.build.sdImage;
     images.rpi_top = nixosConfigurations.rpi.config.system.build.toplevel;
   };
