@@ -94,7 +94,7 @@
     pi_config = { pkgs, lib, ... }: {
       # More networking config
       networking = {
-        interfaces.enu1u1u1.ipv4.addresses = [{
+        interfaces.end0.ipv4.addresses = [{
           address = "192.168.1.7"; # Your static IP address
           prefixLength = 24; # Netmask, 24 for 255.255.255.0
         }];
