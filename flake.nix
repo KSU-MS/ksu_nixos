@@ -12,7 +12,7 @@
   # All the outside things to fetch from the internet
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/c871670c7dad94b3454b8fc9a8a35e1ab92d8b3e";
-    data_acq.url = "github:KSU-MS/fg_daq/";
+    data_acq.url = "github:KSU-MS/ksu_daq";
     raspberry-pi-nix.url = "github:tstat/raspberry-pi-nix";
   };
 
@@ -85,7 +85,7 @@
 
         can.interfaces = {
           can0 = {
-            bitrate = 500000;
+            bitrate = 1000000;
           };
         };
       };
@@ -108,7 +108,7 @@
       system = "aarch64-linux";
       modules = [
         ./modules/data_acq.nix
-        # ./modules/can_network.nix
+        ./modules/can_network.nix
         (
           { pkgs, ... }: {
             config = {
