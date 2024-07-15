@@ -28,13 +28,15 @@
       # NTP time sync flag (network time protocol)
       services.timesyncd.enable = true;
 
-      # User setup
+      # Disable needing a signature on bins
       nix.settings.require-sigs = false;
-      users.users.nixos.group = "nixos";
+
+      # User setup
       users.users.root.initialPassword = "root";
+      users.users.nixos.group = "nixos";
       users.users.nixos.password = "nixos";
       users.users.nixos.extraGroups = [ "wheel" ];
-      users.groups.nixos = { };
+      # users.groups.nixos = { };
       users.users.nixos.isNormalUser = true;
 
       system.activationScripts.createRecordingsDir = nixpkgs.lib.stringAfter [ "users" ] ''
@@ -64,17 +66,6 @@
           user.email = "";
         };
       };
-
-      # Serial udev rule for xbee
-      # services.udev.extraRules = ''
-      #   KERNEL=="ttyUSB*", SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6015", SYMLINK+="xboi"
-      #   # Identify
-      #   # Find the ATTRS with this command
-      #   # udevadm info --attribute-walk --name=/dev/*
-      #   # Set perms
-      #   # Symlink it for a consistant name
-      # '';
-
     };
 
     # Config for can device
@@ -91,7 +82,19 @@
       };
     };
 
-    pi_config = { pkgs, lib, ... }: {
+    xbee_config = {
+      # Serial udev rule for xbee
+      services.udev.extraRules = ''
+        KERNEL=="ttyUSB*", SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6015", SYMLINK+="xboi"
+        # Identify
+        # Find the ATTRS with this command
+        # udevadm info --attribute-walk --name=/dev/*
+        # Set perms
+        # Symlink it for a consistant name
+      '';
+    };
+
+    pi5_config = { pkgs, lib, ... }: {
       # More networking config
       networking = {
         interfaces.end0.ipv4.addresses = [{
@@ -148,7 +151,7 @@
         # Running the configs made earlier
         shared_config
         can_config
-        pi_config
+        pi5_config
       ];
     };
 
