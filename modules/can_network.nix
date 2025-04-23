@@ -12,17 +12,20 @@ in
 
     interfaces = mkOption {
       default = {};
+
       example = literalExpression ''{
         can0 = {
           bitrate = 500000;
         };
       }'';
+
       type = types.attrsOf (types.submodule {
         options = {
           name = mkOption {
             type = types.str;
             description = "The name of the CAN interface.";
           };
+
           bitrate = mkOption {
             type = types.int;
             default = 500000;
@@ -30,6 +33,7 @@ in
           };
         };
       });
+
       description = "CAN interface configurations.";
     };
   };

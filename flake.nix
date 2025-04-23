@@ -59,13 +59,13 @@
         nixpkgs.lib.mkOverride 40 [ "multi-user.target" ];
 
       # Git setup
-      programs.git = {
-        enable = true;
-        config = {
-          user.name = "";
-          user.email = "";
-        };
-      };
+      # programs.git = {
+      #   enable = true;
+      #   config = {
+      #     user.name = "";
+      #     user.email = "";
+      #   };
+      # };
     };
 
     # Config for can device
@@ -76,7 +76,7 @@
 
         can.interfaces = {
           can0 = {
-            bitrate = 1000000;
+            bitrate = 500000;
           };
         };
       };
@@ -98,7 +98,7 @@
       # More networking config
       networking = {
         interfaces.end0.ipv4.addresses = [{
-          address = "192.168.1.7"; # Your static IP address
+          address = "192.168.1.8"; # Your static IP address
           prefixLength = 24; # Netmask, 24 for 255.255.255.0
         }];
         defaultGateway = "192.168.1.1";
