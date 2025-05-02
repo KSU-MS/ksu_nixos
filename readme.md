@@ -5,6 +5,7 @@ pre-reqs:
     - install `qemu-user-static qemu-user-binfmt qemu-user curl git` package then in `/etc/nix/nix.conf` add: 
         `extra-platforms = aarch64-linux arm-linux` 
         `trusted-users = root <your-user-here>`
+        `sandbox = false`
     and restart
         `nix-daemon.service`
 
