@@ -5,7 +5,7 @@
       openssh = {
         enable = true;
         openFirewall = true;
-        passwordAuthentication = false;
+        settings.PasswordAuthentication = true;
       };
       transmission = {
         enable = true;

@@ -13,8 +13,8 @@
       flakeContext = {
         inherit inputs;
       };
-    in
-    {
+
+    in {
       nixosModules = {
         # Core service things
         services = import ./modules/services.nix flakeContext;
@@ -25,6 +25,7 @@
         daq_service = import ./modules/data_acq.nix flakeContext;
         can_network = import ./modules/can_network.nix flakeContext;
       };
+
       packages = {
         aarch64-linux = {
           nixos = import ./packages/nixos.nix flakeContext;
