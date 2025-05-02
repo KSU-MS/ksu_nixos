@@ -1,4 +1,5 @@
-{ lib, pkgs, config, ... }:
+{ inputs, ... }@flakeContext:
+{ config, lib, pkgs, ... }:
 
 let
   # Shorter name to access final settings a 
