@@ -1,14 +1,5 @@
 { inputs, ... }@flakeContext:
-{ config, lib, pkgs, ... }:
-
-let
-  # Shorter name to access final settings a 
-  # user of hello.nix module HAS ACTUALLY SET.
-  # cfg is a typical convention.
-  cfg = config.services.data_writer;
-in
-{
-
+{ config, lib, pkgs, ... }: {
   config = {
     # https://nixos.org/manual/nixos/stable/options.html search for systemd.services.<name>. to get list of all of the options for 
     # new systemd services

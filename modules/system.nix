@@ -3,8 +3,9 @@
   # 
   imports = [
     inputs.self.nixosModules.services
-    inputs.self.nixosModules.user-root
+    inputs.self.nixosModules.users
     inputs.self.nixosModules.can_network
+    # inputs.self.nixosModules.daq_service
   ];
 
   config = {

@@ -7,6 +7,7 @@
         openFirewall = true;
         settings.PasswordAuthentication = true;
       };
+      
       transmission = {
         enable = true;
         openFirewall = true;
