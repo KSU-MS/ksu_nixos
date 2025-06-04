@@ -36,7 +36,7 @@
       users.users.nixos.group = "nixos";
       users.users.nixos.password = "nixos";
       users.users.nixos.extraGroups = [ "wheel" ];
-      # users.groups.nixos = { };
+      users.groups.nixos = { };
       users.users.nixos.isNormalUser = true;
 
       system.activationScripts.createRecordingsDir = nixpkgs.lib.stringAfter [ "users" ] ''
@@ -98,7 +98,7 @@
       # More networking config
       networking = {
         interfaces.end0.ipv4.addresses = [{
-          address = "192.168.1.7"; # Your static IP address
+          address = "192.168.1.8"; # Your static IP address
           prefixLength = 24; # Netmask, 24 for 255.255.255.0
         }];
         defaultGateway = "192.168.1.1";
