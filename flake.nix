@@ -13,11 +13,12 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/c871670c7dad94b3454b8fc9a8a35e1ab92d8b3e";
     data_acq.url = "github:KSU-MS/ksu_daq";
+    data_offload_app.url = "github:KSU-ms/data_offload_app";
     raspberry-pi-nix.url = "github:tstat/raspberry-pi-nix";
   };
 
   # All the things going into the generated image
-  outputs = { self, nixpkgs, data_acq, raspberry-pi-nix }: rec {
+  outputs = { self, nixpkgs, data_acq, data_offload_app, raspberry-pi-nix }: rec {
     shared_config = {
       # Target architecture
       nixpkgs.hostPlatform.system = "aarch64-linux";
@@ -111,6 +112,7 @@
       system = "aarch64-linux";
       modules = [
         ./modules/data_acq.nix
+        ./modules/data_offload_app.nix
         ./modules/can_network.nix
         (
           { pkgs, ... }: {
@@ -153,6 +155,7 @@
         can_config
         pi5_config
       ];
+      specialArgs = { inherit data_offload_app; };
     };
 
     # Defineing the build commands for the terminal
