@@ -24,7 +24,7 @@
       nixpkgs.hostPlatform.system = "aarch64-linux";
 
       # Overlays
-      nixpkgs.overlays = [ (data_acq.overlays.default) ];
+      nixpkgs.overlays = [ (data_acq.overlays.default) (data_offload_app.overlays.default) ];
 
       # NTP time sync flag (network time protocol)
       services.timesyncd.enable = true;
@@ -138,6 +138,8 @@
                   RemainAfterExit = true;
                 };
               };
+
+              services.data_offload_app.enable = true;
             };
 
             # Start the logging service
